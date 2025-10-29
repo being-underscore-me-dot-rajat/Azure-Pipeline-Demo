@@ -1,19 +1,19 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# SafePark / Starter pipeline using a self-hosted agent
 
 trigger:
-- main
+- main   # adjust if your branch name is different
 
+# Use your self-hosted pool (local machine)
 pool:
-  vmImage: ubuntu-latest
+  name: 'Default'     # or whatever your agent pool name is in Azure DevOps
+  demands:
+  - agent.os -equals Windows_NT  # use Linux if your agent runs on Ubuntu (optional)
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- script: echo Hello from my self-hosted agent!
+  displayName: 'Run a one-line script on local machine'
 
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
+    echo Add other tasks to build, test, and deploy your project here.
+    echo Running on $(Agent.MachineName)
   displayName: 'Run a multi-line script'
