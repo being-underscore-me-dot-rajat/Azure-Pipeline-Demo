@@ -9,12 +9,6 @@ steps:
 - script: echo "Starting build on self-hosted agent..."
   displayName: "Initialize"
 
-# --- Step 2: Set up Python ---
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.10'
-  displayName: "Set up Python 3.10"
-
 # --- Step 3: Install dependencies ---
 - script: |
     python -m venv venv
