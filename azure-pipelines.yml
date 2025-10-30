@@ -1,19 +1,31 @@
-# SafePark / Starter pipeline using a self-hosted agent
-
 trigger:
-- main   # adjust if your branch name is different
+- main  # or whatever branch you’re using
 
-# Use your self-hosted pool (local machine)
 pool:
-  name: 'Default'     # or whatever your agent pool name is in Azure DevOps
-  demands:
-  - agent.os -equals Windows_NT  # use Linux if your agent runs on Ubuntu (optional)
+  name: 'Default'  # your self-hosted pool name
 
 steps:
-- script: echo Hello from my self-hosted agent!
-  displayName: 'Run a one-line script on local machine'
+# --- Step 1: Check the code ---
+- script: echo "Starting build on self-hosted agent..."
+  displayName: "Initialize"
 
+# --- Step 2: Set up Python ---
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.10'
+  displayName: "Set up Python 3.10"
+
+# --- Step 3: Install dependencies ---
 - script: |
-    echo Add other tasks to build, test, and deploy your project here.
-    echo Running on $(Agent.MachineName)
-  displayName: 'Run a multi-line script'
+    python -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+  displayName: "Install dependencies"
+
+# --- Step 4: Run Flask app (for test/demo) ---
+- script: |
+    source venv/bin/activate
+    python app.py &
+    sleep 10
+    curl http://127.0.0.1:5000
+  displayName: "Run Flask app and test response"
