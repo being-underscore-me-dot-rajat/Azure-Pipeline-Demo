@@ -40,3 +40,16 @@ steps:
     # Kill the Flask app process
     Get-Process python | Where-Object { $_.Path -like "*venv*" } | Stop-Process -Force
   displayName: "Run Flask app and test response"
+
+  # --- Step 4: Publish artifact ---
+- task: CopyFiles@2
+  inputs:
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  displayName: "Copy project files"
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'drop'
+  displayName: "Publish artifact for release pipeline"
