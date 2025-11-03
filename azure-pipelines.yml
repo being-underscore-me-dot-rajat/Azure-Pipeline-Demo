@@ -1,25 +1,42 @@
 trigger:
-- main  # or whatever branch you’re using
+- main  # or your desired branch
 
 pool:
-  name: 'Default'  # your self-hosted pool name
+  name: 'Default'  # your self-hosted Windows agent pool
 
 steps:
-# --- Step 1: Check the code ---
-- script: echo "Starting build on self-hosted agent..."
+# --- Step 1: Initialize ---
+- powershell: |
+    Write-Host "Starting build on Windows self-hosted agent..."
   displayName: "Initialize"
 
-# --- Step 3: Install dependencies ---
-- script: |
+# --- Step 2: Install dependencies ---
+- powershell: |
     python -m venv venv
-    source venv/bin/activate
+    .\venv\Scripts\activate
+    pip install --upgrade pip
     pip install -r requirements.txt
   displayName: "Install dependencies"
 
-# --- Step 4: Run Flask app (for test/demo) ---
-- script: |
-    source venv/bin/activate
-    python app.py &
-    sleep 10
-    curl http://127.0.0.1:5000
+# --- Step 3: Run Flask app and test response ---
+- powershell: |
+    .\venv\Scripts\activate
+
+    # Start Flask app in background
+    Start-Process -FilePath "python" -ArgumentList "app.py"
+    Write-Host "Flask app started, waiting 10 seconds..."
+    Start-Sleep -Seconds 10
+
+    # Test response
+    try {
+        $response = curl http://127.0.0.1:5000
+        Write-Host "Response from Flask app:"
+        Write-Host $response.Content
+    } catch {
+        Write-Error "Failed to connect to Flask app."
+        exit 1
+    }
+
+    # Kill the Flask app process
+    Get-Process python | Where-Object { $_.Path -like "*venv*" } | Stop-Process -Force
   displayName: "Run Flask app and test response"
