@@ -16,9 +16,31 @@ steps:
     .\venv\Scripts\activate
     pip install --upgrade pip
     pip install -r requirements.txt
+
+    # Install test dependencies
+    pip install pytest pytest-cov
   displayName: "Install dependencies"
 
-# --- Step 3: Run Flask app and test response ---
+# --- Step 3: Run tests with coverage ---
+- powershell: |
+    .\venv\Scripts\activate
+
+    Write-Host "Running tests with coverage..."
+    pytest --cov=app --cov-report=xml --cov-report=term-missing tests/
+
+    Write-Host "Tests completed. Coverage report generated as coverage.xml"
+  displayName: "Run tests with code coverage"
+
+# --- Step 4: Publish code coverage results ---
+- task: PublishCodeCoverageResults@2
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: 'coverage.xml'
+    reportDirectory: ''
+    failIfCoverageEmpty: true
+  displayName: "Publish code coverage report"
+
+# --- Step 5: Run Flask app and test response ---
 - powershell: |
     .\venv\Scripts\activate
 
@@ -41,7 +63,7 @@ steps:
     Get-Process python | Where-Object { $_.Path -like "*venv*" } | Stop-Process -Force
   displayName: "Run Flask app and test response"
 
-  # --- Step 4: Publish artifact ---
+# --- Step 6: Publish artifact for release pipeline ---
 - task: CopyFiles@2
   inputs:
     Contents: '**'
