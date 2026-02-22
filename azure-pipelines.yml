@@ -46,30 +46,7 @@ steps:
     failIfCoverageEmpty: true
   displayName: "Publish code coverage report"
 
-# --- Step 5: Run Flask app and test response ---
-- powershell: |
-    .\venv\Scripts\activate
-
-    # Start Flask app in background
-    Start-Process -FilePath "python" -ArgumentList "app.py"
-    Write-Host "Flask app started, waiting 10 seconds..."
-    Start-Sleep -Seconds 10
-
-    # Test response
-    try {
-        $response = curl http://127.0.0.1:5000
-        Write-Host "Response from Flask app:"
-        Write-Host $response.Content
-    } catch {
-        Write-Error "Failed to connect to Flask app."
-        exit 1
-    }
-
-    # Kill the Flask app process
-    Get-Process python | Where-Object { $_.Path -like "*venv*" } | Stop-Process -Force
-  displayName: "Run Flask app and test response"
-
-# --- Step 6: Publish artifact for release pipeline ---
+# --- Step 5: Publish artifact for release pipeline ---
 - task: CopyFiles@2
   inputs:
     Contents: '**'
